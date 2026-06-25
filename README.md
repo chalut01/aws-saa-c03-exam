@@ -1,5 +1,7 @@
 # AWS SAA-C03 Exam Simulator
 
+https://chalut01.github.io/aws-saa-c03-exam/
+
 โปรเจคนี้เป็นเว็บแอปแบบ client-side สำหรับจำลองข้อสอบ AWS Certified Solutions Architect - Associate (SAA-C03) โดยใช้ไฟล์ JSON ของคำถามเป็นข้อมูล
 
 ## สิ่งที่โปรเจคทำได้
