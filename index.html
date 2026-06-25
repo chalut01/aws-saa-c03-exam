@@ -177,7 +177,9 @@
     <h2>AWS Exam Simulator</h2>
 
     <div id="setup-section">
-        <p>กรุณาอัปโหลดไฟล์ <strong>questions.json</strong> ของคุณเพื่อเริ่มทำข้อสอบ</p>
+        <p>กรุณาอัปโหลดไฟล์ <strong>questions.json</strong> ของคุณหรือใช้ไฟล์ตัวอย่างด้านล่างเพื่อเริ่มทำข้อสอบ</p>
+        <button id="load-prebuilt-btn" class="btn" style="margin-bottom: 15px;">AWS Certified Solutions Architect - Associate</button>
+        <br>
         <input type="file" id="jsonFileInput" accept=".json">
         
         <div class="setting-row">
@@ -247,6 +249,7 @@
     const feedbackStatus = document.getElementById('feedback-status');
     const explanationText = document.getElementById('explanation-text');
     const nextBtn = document.getElementById('next-btn');
+    const loadPrebuiltBtn = document.getElementById('load-prebuilt-btn');
 
     // ฟังก์ชันสำหรับสับเปลี่ยนลำดับ Array (Fisher-Yates Shuffle)
     function shuffleArray(array) {
@@ -254,6 +257,28 @@
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
+    }
+
+    function startQuizFromData(data) {
+        questionsData = Array.isArray(data) ? data.slice() : [];
+        if (questionsData.length === 0) {
+            alert("ไม่พบข้อมูลคำถามในไฟล์ JSON");
+            return;
+        }
+
+        currentIndex = 0;
+        score = 0;
+        incorrectScore = 0;
+        scoreCorrectEl.textContent = score;
+        scoreIncorrectEl.textContent = incorrectScore;
+
+        if (randomizeCheckbox.checked) {
+            shuffleArray(questionsData);
+        }
+
+        setupSection.classList.add('hidden');
+        quizSection.classList.remove('hidden');
+        loadQuestion();
     }
 
     // โหลดไฟล์ JSON
@@ -264,25 +289,25 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                questionsData = JSON.parse(e.target.result);
-                if(questionsData.length > 0) {
-                    
-                    // สุ่มข้อสอบถ้ามีการติ๊กเลือกไว้
-                    if (randomizeCheckbox.checked) {
-                        shuffleArray(questionsData);
-                    }
-
-                    setupSection.classList.add('hidden');
-                    quizSection.classList.remove('hidden');
-                    loadQuestion();
-                } else {
-                    alert("ไม่พบข้อมูลคำถามในไฟล์ JSON");
-                }
+                const data = JSON.parse(e.target.result);
+                startQuizFromData(data);
             } catch (err) {
                 alert("เกิดข้อผิดพลาดในการอ่านไฟล์ JSON: " + err.message);
             }
         };
         reader.readAsText(file);
+    });
+
+    loadPrebuiltBtn.addEventListener('click', function() {
+        fetch('aws-saa-c03-full-exam.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('ไม่สามารถโหลดไฟล์ตัวอย่างได้: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => startQuizFromData(data))
+            .catch(err => alert('เกิดข้อผิดพลาดในการโหลดไฟล์ตัวอย่าง: ' + err.message));
     });
 
     // โหลดข้อสอบขึ้นมาแสดง
